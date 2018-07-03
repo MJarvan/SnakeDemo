@@ -5,8 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SnakeDemo"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="500" Loaded="Window_Loaded">
-    <Canvas Name="canvas">
-        
-    </Canvas>
+        Title="MainWindow" Height="550" Width="550" Loaded="Window_Loaded" KeyDown="Window_KeyDown">
+	<Border BorderThickness="1" BorderBrush="Black" HorizontalAlignment="Center" VerticalAlignment="Center">
+		<Canvas Height="500" Width="500" Name="canvas">
+
+		</Canvas>
+	</Border>
 </Window>
