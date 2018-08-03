@@ -43,33 +43,33 @@ namespace SnakeDemo
 			SnakePoint.Clear();
 			IsFood = false;
 			direction = Key.Right;
-
-
 			int SnakeX = random.Next(10,40) * 10;
             int SnakeY = random.Next(10,40) * 10;
             //预创建蛇
             SnakePoint.Add(new Point(SnakeX + 4 * SnakeSize,SnakeY));
-            SnakePoint.Add(new Point(SnakeX + 3 * SnakeSize,SnakeY));
+			SnakePoint.Add(new Point(SnakeX + 3 * SnakeSize,SnakeY));
             SnakePoint.Add(new Point(SnakeX + 2 * SnakeSize,SnakeY));
             SnakePoint.Add(new Point(SnakeX + 1 * SnakeSize,SnakeY));
             SnakePoint.Add(new Point(SnakeX,SnakeY));
 
             RefershSnake();
-            RefershFood();
+			if(e.RoutedEvent.OwnerType == typeof(FrameworkElement))
+			{
+				//定时器初始化
+				timer = new System.Windows.Threading.DispatcherTimer();
+				timer.Tick += new EventHandler(OnTimedEvent);
+				timer.Interval = TimeSpan.FromSeconds(0.5);
+			}
+			timer.Start();
+		}
 
-            //定时器初始化
-            timer = new System.Windows.Threading.DispatcherTimer();
-            timer.Tick += new EventHandler(OnTimedEvent);
-            timer.Interval = TimeSpan.FromSeconds(0.5);
-            timer.Start();
-        }
-
-        /// <summary>
-        /// 刷新蛇
-        /// </summary>
-        private void RefershSnake()
+		/// <summary>
+		/// 刷新蛇
+		/// </summary>
+		private void RefershSnake()
         {
             canvas.Children.Clear();
+			bool isOver = false;
             foreach(Point point in SnakePoint)
             {
                 Rectangle rtg = new Rectangle();
@@ -82,15 +82,21 @@ namespace SnakeDemo
 
                 if(point.X == canvas.Width || point.Y == canvas.Height || point.X == 0 || point.Y == 0)
                 {
-                    timer.Stop();
-                    MessageBox.Show("nishule");
+					isOver = true;
                 }
             }
-        }
-        /// <summary>
-        /// 刷新食物
-        /// </summary>
-        private void RefershFood()
+			if(isOver)
+			{
+				timer.Stop();
+				MessageBox.Show("nishule");
+				return;
+			}
+			RefershFood();
+		}
+		/// <summary>
+		/// 刷新食物
+		/// </summary>
+		private void RefershFood()
         {
             if(!IsFood)
             {
@@ -162,7 +168,6 @@ namespace SnakeDemo
 
             SnakePoint.Insert(0,newpoint);
             RefershSnake();
-            RefershFood();
         }
 
         /// <summary>
@@ -176,40 +181,45 @@ namespace SnakeDemo
 
 			//蛇头向上的时候不能往下跑
 			if(Keyboard.IsKeyDown(Key.Up) && direction != Key.Down)
-            {
+			{
 				if(direction == Key.Up)
 				{
-					SnakeBoost();
+					SnakeBoost(e);
 				}
 				direction = Key.Up;
-            }
+			}
 			//蛇头向下的时候不能往上跑
 			else if(Keyboard.IsKeyDown(Key.Down) && direction != Key.Up)
-            {
+			{
 				if(direction == Key.Down)
 				{
-					SnakeBoost();
+					SnakeBoost(e);
 				}
 				direction = Key.Down;
-            }
+			}
 			//蛇头向左的时候不能往右跑
 			else if(Keyboard.IsKeyDown(Key.Left) && direction != Key.Right)
-            {
+			{
 				if(direction == Key.Left)
 				{
-					SnakeBoost();
+					SnakeBoost(e);
 				}
 				direction = Key.Left;
-            }
+			}
 			//蛇头向右的时候不能往左跑
 			else if(Keyboard.IsKeyDown(Key.Right) && direction != Key.Left)
-            {
+			{
 				if(direction == Key.Right)
 				{
-					SnakeBoost();
+					SnakeBoost(e);
 				}
 				direction = Key.Right;
-            }
+			}
+			//重新开始
+			else if(Keyboard.IsKeyDown(Key.R))
+			{
+				Window_Loaded(sender,e);
+			}
         }
 
 		private void Window_KeyUp(object sender,KeyEventArgs e)
@@ -220,41 +230,38 @@ namespace SnakeDemo
 		/// <summary>
 		/// 加速蛇前进
 		/// </summary>
-		private void SnakeBoost()
+		private void SnakeBoost(KeyEventArgs e)
 		{
-			//timer.Stop();
-			//         Point headpoint = SnakePoint[0];
-			//Point firstnewpoint = CreateNewPoint(headpoint);
-			//Point secondnewpoint = CreateNewPoint(CreateNewPoint(headpoint));
+			if(e.IsDown)
+			{
+				List<Point> newpointlist = new List<Point>();
+				Point newpoint = CreateNewPoint(SnakePoint[0]);
+				//判断蛇是否碰到自己的身体
+				if(SnakePoint.Contains(newpoint))
+				{
+					timer.Stop();
+					MessageBox.Show("nishule");
+					return;
+				}
+				newpointlist.Add(newpoint);
 
-			////判断蛇是否碰到自己的身体
-			//if(SnakePoint.Contains(firstnewpoint) || SnakePoint.Contains(secondnewpoint))
-			//{
-			//	timer.Stop();
-			//	MessageBox.Show("nishule");
-			//	return;
-			//}
+				for(int i = 0;i < SnakePoint.Count - 1;i++)
+				{
+					newpointlist.Add(SnakePoint[i]);
+				}
 
-			////判断蛇是否吃到了食物
-			//if((IsFood && firstnewpoint == FoodPoint) || (IsFood && secondnewpoint == FoodPoint))
-			//{
-			//	IsFood = false;
-			//}
-			//else
-			//{
-			//	SnakePoint.Remove(SnakePoint[SnakePoint.Count - 1]);
-			//	SnakePoint.Remove(SnakePoint[SnakePoint.Count - 1]);
-			//}
+				SnakePoint = newpointlist.ToList();
 
-			//SnakePoint.Insert(0,firstnewpoint);
-			//SnakePoint.Insert(0,secondnewpoint);
-			//RefershSnake();
-			//RefershFood();
-			//timer.Start();
-
-			OnTimedEvent(null,new EventArgs());
-			OnTimedEvent(null,new EventArgs());
-
+				foreach(Point point in newpointlist)
+				{
+					//判断蛇是否吃到了食物
+					if(IsFood && point == FoodPoint)
+					{
+						IsFood = false;
+						SnakePoint.Add(SnakePoint[SnakePoint.Count - 1]);
+					}
+				}
+			}
 		}
 
 		private Point CreateNewPoint(Point headpoint)
